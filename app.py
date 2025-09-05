@@ -3,7 +3,7 @@ import pickle
 import time
 
 models = {
-    'heart_matching': pickle.load(open('pickel_files/heart_transplant.sav', 'rb'))
+    'heart_matching': pickle.load(open('pickle_files/heart_transplant.sav', 'rb'))
 }
 
 # Example mappings for categorical features (update these based on your model training)
@@ -180,5 +180,6 @@ input[type="text"]:focus, input[type="number"]:focus {{
                     st.error(heart_matching)
             except Exception as e:
                 st.error(f"Error in prediction: {e}")
+
 
 main_app()
