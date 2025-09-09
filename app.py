@@ -3,7 +3,7 @@ import pickle
 import time
 
 models = {
-    'heart_matching': pickle.load(open('pickle_files/heart_transplant.sav', 'rb'))
+    'heart_matching': pickle.load(open('pickel_files/heart_transplant.sav', 'rb'))
 }
 
 # Example mappings for categorical features (update these based on your model training)
@@ -104,7 +104,7 @@ input[type="text"]:focus, input[type="number"]:focus {{
         st.title('Heart Match Prediction')
         st.write("Enter the following details to determine the heart match prediction:")
 
-        # Numeric and simple categorical
+        # --- Direct Input Features (11) ---
         AGE = display_input('Recipient Age', 'Enter recipient\'s age', 'AGE', 'number')
         AGE_DON = display_input('Donor Age', 'Enter donor\'s age', 'AGE_DON', 'number')
         CREAT_TRR = display_input('Recipient Creatinine', 'Enter recipient\'s creatinine level', 'CREAT_TRR', 'number')
@@ -112,74 +112,93 @@ input[type="text"]:focus, input[type="number"]:focus {{
         BMI_CALC = display_input('Recipient BMI', 'Enter recipient\'s Body Mass Index', 'BMI_CALC', 'number')
         BMI_DON_CALC = display_input('Donor BMI', 'Enter donor\'s Body Mass Index', 'BMI_DON_CALC', 'number')
         DAYSWAIT_CHRON = display_input('Days on Waiting List', 'Enter number of days on waiting list', 'DAYSWAIT_CHRON', 'number')
-        medcondition = st.selectbox('Medical Condition', ['0', '1', '2'])  # Use your actual codes
+        medcondition = st.selectbox('Medical Condition', ['0', '1', '2'])
         ABOMAT = st.selectbox('Blood Type Match', ['0', '1'])
         DISTANCE = display_input('Distance', 'Enter distance between donor and recipient', 'DISTANCE', 'number')
         TX_YEAR = display_input('Transplant Year', 'Enter year of transplant', 'TX_YEAR', 'number')
 
+        # --- Categorical Input Features (for one-hot encoding) ---
 
         diagnosis_options = [
-            'FAILED OHT', 'HCM', 'ICM', 'NICM', 'OTHER/UNKNOWN', 'RESTRICTIVE', 'VALVULAR'
+            'CONGENITAL', 'FAILED OHT', 'HCM', 'ICM', 'NICM', 'OTHER/UNKNOWN', 'RESTRICTIVE', 'VALVULAR'
         ]
         diagnosis = st.selectbox('Diagnosis', diagnosis_options)
 
         mcs_options = [
-            'IABP', 'bivad/tah', 'dischargeable VAD', 'left endo device', 'non-dischargeable VAD', 'none', 'right endo device'
+            'ECMO', 'IABP', 'bivad/tah', 'dischargeable VAD', 'left endo device', 'non-dischargeable VAD', 'none', 'right endo device'
         ]
         mcs = st.selectbox('Medical Condition Score', mcs_options)
 
-        abo_options = ['AB', 'B', 'O']
+        abo_options = ['A', 'AB', 'B', 'O']
         abo = st.selectbox('Recipient Blood Type', abo_options)
-
+        
         CODDON_options = [
-            'Cardiovascular', 'Drowning', 'Drug Intoxication', 'IntracranHem/Stroke/Seiz', 'Natural Causes', 'Trauma'
+            'Anoxia/Asphyx', 'Cardiovascular', 'Drowning', 'Drug Intoxication', 
+            'IntracranHem/Stroke/Seiz', 'Natural Causes', 'Trauma'
         ]
         CODDON = st.selectbox('Cause of Death (Donor)', CODDON_options)
-
+        
         HIST_MI = st.selectbox('History of Myocardial Infarction', ['No', 'Yes'])
-
-
-        diagnosis_bools = [1 if diagnosis == opt else 0 for opt in diagnosis_options]
-        mcs_bools = [1 if mcs == opt else 0 for opt in mcs_options]
-        abo_bools = [1 if abo == opt else 0 for opt in abo_options]
-        CODDON_bools = [1 if CODDON == opt else 0 for opt in CODDON_options]
-        HIST_MI_Y = 1 if HIST_MI == 'Yes' else 0
-
+        diabetes = st.selectbox('History of Diabetes', ['No', 'Yes'])
+        
         if st.button('Predict Match'):
             try:
-                input_data = [
-                    float(AGE),             
-                    float(AGE_DON),         
-                    float(CREAT_TRR),         
-                    float(CREAT_DON),         
-                    float(BMI_CALC),           
-                    float(BMI_DON_CALC),       
-                    float(DAYSWAIT_CHRON),    
-                    int(medcondition),         
-                    int(ABOMAT),              
-                    float(DISTANCE),          
-                    int(TX_YEAR),              
                 
-                    *diagnosis_bools,          
+                diagnosis_bools = [1 if diagnosis == opt else 0 for opt in diagnosis_options]
+                
+                mcs_bools = [1 if mcs == opt else 0 for opt in mcs_options]
+
+           
+                abo_bools = [1 if abo == opt else 0 for opt in abo_options]
+                
+          
+                CODDON_bools = [1 if CODDON == opt else 0 for opt in CODDON_options]
+
+              
+                diabetes_Y = 1 if diabetes == 'Yes' else 0
+                
+         
+                HIST_MI_N = 1 if HIST_MI == 'No' else 0
+                HIST_MI_Y = 1 if HIST_MI == 'Yes' else 0
+                
+               
+                input_data = [
+              
+                    float(AGE), float(AGE_DON), float(CREAT_TRR), float(CREAT_DON), 
+                    float(BMI_CALC), float(BMI_DON_CALC), float(DAYSWAIT_CHRON), 
+                    int(medcondition), int(ABOMAT), float(DISTANCE), int(TX_YEAR),
+                    
                   
-                    *mcs_bools,               
-                 
-                    *abo_bools,                
-            
-                    *CODDON_bools,             
-                    HIST_MI_Y                  
+                    *diagnosis_bools,
+                    
+                  
+                    *mcs_bools,
+                    
+                  
+                    *abo_bools,
+                    
+                    
+                    *CODDON_bools,
+                    
+                  
+                    diabetes_Y,
+                    
+                
+                    HIST_MI_N, HIST_MI_Y
                 ]
-            
-
-                heart_prediction = models['heart_matching'].predict([input_data])
-                heart_matching = 'The heart is a match' if heart_prediction[0] == 1 else 'The heart is not a match'
-
-                if heart_prediction[0] == 1:
-                    st.success(heart_matching)
+                
+                
+                if len(input_data) != 41:
+                    st.error(f"Input data has {len(input_data)} features, but model expects 40. Please check the feature lists and your input logic.")
                 else:
-                    st.error(heart_matching)
+                    heart_prediction = models['heart_matching'].predict([input_data])
+                    heart_matching = 'The heart is a match' if heart_prediction[0] == 1 else 'The heart is not a match'
+                    
+                    if heart_prediction[0] == 1:
+                        st.success(heart_matching)
+                    else:
+                        st.error(heart_matching)
             except Exception as e:
                 st.error(f"Error in prediction: {e}")
-
 
 main_app()
