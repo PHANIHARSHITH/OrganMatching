@@ -28,7 +28,7 @@ def main_app():
                 """
     st.markdown(hide_st_style, unsafe_allow_html=True)
 
-    background_image_url = "https://c4.wallpaperflare.com/wallpaper/697/865/74/abstract-abstraction-biology-chemistry-wallpaper-preview.jpg"  
+    background_image_url = "https://raw.githubusercontent.com/PHANIHARSHITH/OrganMatching/main/Images/image.png"  
 
     page_bg_img = f"""
     <style>
@@ -202,3 +202,4 @@ input[type="text"]:focus, input[type="number"]:focus {{
                 st.error(f"Error in prediction: {e}")
 
 main_app()
+
